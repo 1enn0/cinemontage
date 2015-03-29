@@ -1,2 +1,11 @@
 # cinemontage
-create film posters, inspired by "cinema redux"
+create film fingerprints, inspired by "cinema redux"
+
+just a simple bash script for creating film fingerprints
+
+##dependencies
+*avconv
+*imagemagick
+
+on debian like systems, you can install all required dependencies by executing the following command in your terminal:
+[code]sudo apt-get install libav-tools imagemagick[/code]
