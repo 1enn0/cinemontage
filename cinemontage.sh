@@ -12,6 +12,7 @@ usage () {
 	echo "  -h help          display this help"
 	echo "  -k keep          keep thumbnails"
 	echo "  -m montage-only  use existing thumbnails"
+	echo "  -s space         set space between rows (default: 44 px, 4 px in tiny mode)"
 	echo "  -t tiny          create tiny 16x9 px thumbnails (default: 160x90 px)"
 	echo ""
 	echo "EXAMPLES:"
@@ -40,7 +41,7 @@ if [[ $@ == "" ]]; then
 fi
 
 # read the options
-ARGS=`getopt -o c:hkmt --long columns:,help,keep,montage-only,tiny -n 'cinemontage.sh' -- "$@"`
+ARGS=`getopt -o c:hkms:t --long columns:,help,keep,montage-only,space:,tiny -n 'cinemontage.sh' -- "$@"`
 eval set -- "$ARGS"
 
 
@@ -55,6 +56,11 @@ while true ; do
         -h|--help) usage && exit 1 ; shift ;;
         -k|--keep) KEEP_FLAG=1 ; shift ;;
         -m|--montage-only) MONTAGE_ONLY_FLAG=1 ; shift ;;
+		-s|--space)
+            case "$2" in
+                "") shift 2 ;;
+                *) SPACE=$2 ; shift 2 ;;
+            esac ;;
         -t|--tiny) TINY_FLAG=1 ; shift ;;
 		--) shift ; break ;;
         *) echo "Internal error!" ; exit 1 ;;
@@ -75,13 +81,21 @@ if [[ $TINY_FLAG == 1 ]]; then
 	H_SIZE=16
 	V_SIZE=9
 	H_SPACE=0
-	V_SPACE=2
+	if [[ $SPACE ]]; then
+		let "V_SPACE=$SPACE/2"
+	else
+		V_SPACE=2
+	fi
 	FILENAME="$BASENAME"_tiny.jpg
 else
 	H_SIZE=160
 	V_SIZE=90
 	H_SPACE=0
-	V_SPACE=22
+	if [[ $SPACE ]]; then
+		let "V_SPACE=$SPACE/2"
+	else
+		V_SPACE=22
+	fi
 	FILENAME=$BASENAME.jpg
 fi
 
@@ -95,7 +109,13 @@ else
 fi
 
 
-printf "Stitching montage, %s images per row...\n" $COLUMNS
+if [[ $SPACE ]]; then
+	printf "Stitching montage, %s images/row, %s px space between rows...\n" $COLUMNS $SPACE
+else
+	printf "Stitching montage, %s images/row...\n" $COLUMNS
+fi
+
+
 # create the montage
 montage -background black "$TMPDIR"/*.jpg -tile "$COLUMNS"x -geometry "$H_SIZE"x"$V_SIZE"\>+"$H_SPACE"+"$V_SPACE" "$FILENAME"
 
