@@ -6,9 +6,10 @@
 
 printf "\n-----------------\n   cinemontage   \n-----------------\n"
 
-# set initial values for flags
+# set initial values
 TINY_FLAG=0
 KEEP_FLAG=0
+PICS_PER_ROW=60
 
 # read the options
 ARGS=`getopt -o kt --long keep,tiny -n 'cinemontage.sh' -- "$@"`
@@ -32,25 +33,6 @@ if [ ! -d $TMPDIR ]; then
 mkdir $TMPDIR
 fi
 
-# Find framerate of the video
-# framerates can be one of the following: 23.97, 24, 25, 29.97, 30, 48, 50, 60
-FPS_TXT=`avconv -i $INPUTFILE 2>&1 | grep fps | cut -f5 -d ',' | cut -f2 -d ' '`
-
-if [[ "24 25 30 48 50 60" =~ $FPS_TXT ]]; then
-	let "FPS=$FPS_TXT"
-	echo "Detected framerate: $FPS fps"
-elif [[ "23.976 23.97 23.98" =~ $FPS_TXT ]]; then
-	FPS=24
- 	echo "Detected framerate: approx. $FPS fps"
-elif [[ "29.976 29.97 29.98" =~ $FPS_TXT ]]; then
-	FPS=30
- 	echo "Detected framerate: approx. $FPS fps"
-else
-	echo "Oops. Framerate not recognized."
-	exit 1
-fi
-
-
 if [[ $TINY_FLAG == 1 ]]; then
 	H_SIZE=16
 	V_SIZE=9
@@ -69,9 +51,9 @@ printf "Creating thumbnails...\n"
 # take one image every second and resize to 160x90 px
 avconv -v quiet -i $INPUTFILE -s 160x90 -vsync 1 -r 1 -an -y $TMPDIR/'%04d.jpg'
 
-printf "Stitching montage, %s images per row...\n" $FPS
+printf "Stitching montage, %s images per row...\n" $PICS_PER_ROW
 # create the montage
-montage -background black $TMPDIR/*.jpg -tile `echo $FPS`x -geometry `echo $H_SIZE`x`echo $V_SIZE`\>+`echo $H_SPACE`+`echo $V_SPACE` $FILENAME
+montage -background black "$TMPDIR"/*.jpg -tile "$PICS_PER_ROW"x -geometry "$H_SIZE"x"$V_SIZE"\>+"$H_SPACE"+"$V_SPACE" "$FILENAME"
 
 if [[ $KEEP_FLAG == 0 ]]; then
 	printf "Cleaning up...\n"
