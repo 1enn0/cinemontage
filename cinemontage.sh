@@ -4,7 +4,29 @@
 
 #! /bin/bash -
 
-printf "~~~~~~~~~~~~~~~~\n  cinemontage   \n~~~~~~~~~~~~~~~~\n"
+usage () {
+	echo "Usage: CINEMONTAGE [options] infile"
+	echo ""
+	echo "OPTIONS:"
+	echo "  -c columns       set number of images per row (default: 60)"
+	echo "  -h help          display this help"
+	echo "  -k keep          keep thumbnails"
+	echo "  -m montage-only  use existing thumbnails"
+	echo "  -t tiny          create tiny 16x9 px thumbnails (default: 160x90 px)"
+	echo ""
+	echo "EXAMPLES:"
+	echo "cinemontage -k video.mp4           creates a montage with 60 images per"
+	echo "                                   row, each 160x90 px in size and keeps"
+	echo "                                   them after finishing."
+	echo ""
+	echo "cinemontage -m -c 25 -t video.mp4  creates a montage with 25 images per"
+	echo "                                   row, each 16x9 px in size and deletes" 
+	echo "                                   the thumbnail folder after finishing."
+	echo "                                   only works if the thumbnail folder exists,"
+	echo "                                   i.e. if you have used the »keep« option"
+	echo "                                   previously."
+	echo ""
+}
 
 # set initial values
 COLUMNS=60
@@ -12,9 +34,15 @@ KEEP_FLAG=0
 MONTAGE_ONLY_FLAG=0
 TINY_FLAG=0
 
+if [[ $@ == "" ]]; then
+	printf "You have to specify an input file.\n"
+	usage && exit 1
+fi
+
 # read the options
-ARGS=`getopt -o c:kmt --long columns:,keep,montage-only,tiny -n 'cinemontage.sh' -- "$@"`
+ARGS=`getopt -o c:hkmt --long columns:,help,keep,montage-only,tiny -n 'cinemontage.sh' -- "$@"`
 eval set -- "$ARGS"
+
 
 # extract options set flags
 while true ; do
@@ -24,6 +52,7 @@ while true ; do
                 "") shift 2 ;;
                 *) COLUMNS=$2 ; shift 2 ;;
             esac ;;
+        -h|--help) usage && exit 1 ; shift ;;
         -k|--keep) KEEP_FLAG=1 ; shift ;;
         -m|--montage-only) MONTAGE_ONLY_FLAG=1 ; shift ;;
         -t|--tiny) TINY_FLAG=1 ; shift ;;
@@ -32,6 +61,8 @@ while true ; do
     esac
 done
 
+
+printf "~~~~~~~~~~~~~~~~\n  cinemontage   \n~~~~~~~~~~~~~~~~\n"
 INPUTFILE=$1
 BASENAME=${INPUTFILE%.*}
 
