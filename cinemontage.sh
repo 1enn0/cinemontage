@@ -6,16 +6,16 @@
 
 # set initial values for flags
 TINY_FLAG=0
-CLEANUP_FLAG=0
+KEEP_FLAG=0
 
 # read the options
-ARGS=`getopt -o ct --long cleanup,tiny -n 'cinemontage.sh' -- "$@"`
+ARGS=`getopt -o kt --long keep,tiny -n 'cinemontage.sh' -- "$@"`
 eval set -- "$ARGS"
 
 # extract options set flags
 while true ; do
     case "$1" in
-        -c|--cleanup) CLEANUP_FLAG=1 && echo "CLEANUP_FLAG set" ; shift ;;
+        -k|--k) KEEP_FLAG=1 && echo "KEEP_FLAG set" ; shift ;;
         -t|--tiny) TINY_FLAG=1 && echo "TINY_FLAG set" ; shift ;;
         --) shift ; break ;;
         *) echo "Internal error!" ; exit 1 ;;
@@ -25,8 +25,7 @@ done
 INPUTFILE=$1
 BASENAME=${INPUTFILE%.*}
 
-
-TMPDIR=./tmp
+TMPDIR=./thumbnails
 if [ ! -d $TMPDIR ]; then
 mkdir $TMPDIR
 fi
@@ -72,7 +71,7 @@ printf "Stitching montage [%s images per row]...\n" $FPS
 # create the montage
 montage -background black $TMPDIR/*.jpg -tile `echo $FPS`x -geometry `echo $H_SIZE`x`echo $V_SIZE`\>+`echo $H_SPACE`+`echo $V_SPACE` $FILENAME
 
-if [[ $CLEANUP_FLAG == 1 ]]; then
+if [[ $KEEP_FLAG == 0 ]]; then
 	printf "Cleaning up...\n"
 	rm -r $TMPDIR
 fi
