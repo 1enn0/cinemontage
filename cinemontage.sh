@@ -9,18 +9,23 @@ printf "\n-----------------\n   cinemontage   \n-----------------\n"
 # set initial values
 TINY_FLAG=0
 KEEP_FLAG=0
-PICS_PER_ROW=60
+COLUMNS=60
 
 # read the options
-ARGS=`getopt -o kt --long keep,tiny -n 'cinemontage.sh' -- "$@"`
+ARGS=`getopt -o c:kt --long columns:,keep,tiny -n 'cinemontage.sh' -- "$@"`
 eval set -- "$ARGS"
 
 # extract options set flags
 while true ; do
     case "$1" in
-        -k|--k) KEEP_FLAG=1 ; shift ;;
+		-c|--columns)
+            case "$2" in
+                "") shift 2 ;;
+                *) COLUMNS=$2 ; shift 2 ;;
+            esac ;;
+        -k|--keep) KEEP_FLAG=1 ; shift ;;
         -t|--tiny) TINY_FLAG=1 ; shift ;;
-        --) shift ; break ;;
+		--) shift ; break ;;
         *) echo "Internal error!" ; exit 1 ;;
     esac
 done
@@ -51,9 +56,9 @@ printf "Creating thumbnails...\n"
 # take one image every second and resize to 160x90 px
 avconv -v quiet -i $INPUTFILE -s 160x90 -vsync 1 -r 1 -an -y $TMPDIR/'%04d.jpg'
 
-printf "Stitching montage, %s images per row...\n" $PICS_PER_ROW
+printf "Stitching montage, %s images per row...\n" $COLUMNS
 # create the montage
-montage -background black "$TMPDIR"/*.jpg -tile "$PICS_PER_ROW"x -geometry "$H_SIZE"x"$V_SIZE"\>+"$H_SPACE"+"$V_SPACE" "$FILENAME"
+montage -background black "$TMPDIR"/*.jpg -tile "$COLUMNS"x -geometry "$H_SIZE"x"$V_SIZE"\>+"$H_SPACE"+"$V_SPACE" "$FILENAME"
 
 if [[ $KEEP_FLAG == 0 ]]; then
 	printf "Cleaning up...\n"
