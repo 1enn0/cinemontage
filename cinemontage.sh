@@ -20,10 +20,10 @@ FPS_TXT=`avconv -i $INPUTFILE 2>&1 | grep fps | cut -f5 -d ',' | cut -f2 -d ' '`
 if [[ "24 25 30 48 50 60" =~ $FPS_TXT ]]; then
 	let "FPS=$FPS_TXT"
 	echo "Framerate: $FPS fps"
-elif [[ "23.97" =~ $FPS_TXT ]]; then
+elif [[ "23.976 23.97 23.98" =~ $FPS_TXT ]]; then
 	FPS=24
  	echo "Approximate framerate: $FPS fps"
-elif [[ "29.97 29.98" =~ $FPS_TXT ]]; then
+elif [[ "29.976 29.97 29.98" =~ $FPS_TXT ]]; then
 	FPS=30
  	echo "Approximate framerate: $FPS fps"
 else
