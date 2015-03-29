@@ -4,7 +4,7 @@
 
 #! /bin/bash -
 
-printf "\n-----------------\n   cinemontage   \n-----------------\n"
+printf "~~~~~~~~~~~~~~~~\n  cinemontage   \n~~~~~~~~~~~~~~~~\n"
 
 # set initial values
 COLUMNS=60
@@ -60,7 +60,7 @@ if [[ $MONTAGE_ONLY_FLAG == 0 ]]; then
 	# take one image every second and resize to 160x90 px
 	avconv -v quiet -i $INPUTFILE -s 160x90 -vsync 1 -r 1 -an -y $TMPDIR/'%04d.jpg'
 else
-	printf "Using previously created thumnails..."
+	printf "Using previously created thumbnails.\n"
 fi
 
 
@@ -73,6 +73,8 @@ montage -background black "$TMPDIR"/*.jpg -tile "$COLUMNS"x -geometry "$H_SIZE"x
 if [[ $KEEP_FLAG == 0 ]]; then
 	printf "Cleaning up...\n"
 	rm -r $TMPDIR
+else
+	printf "Keeping thumbnails.\n"
 fi
 
 printf "Done.\n"
