@@ -13,29 +13,24 @@ usage () {
 	echo "OPTIONS:"
 	echo "  -c columns       set number of images per row (default: 60)"
 	echo "  -h help          display this help"
-	echo "  -k keep          keep thumbnails"
-	echo "  -m montage-only  use existing thumbnails"
+	echo "  -r remove        remove thumbnails after finishing"
 	echo "  -s space         set space between rows (default: 44 px; 4 px in tiny mode)"
 	echo "  -t tiny          create tiny 16x9 px thumbnails (default: 160x90 px)"
 	echo ""
 	echo "EXAMPLES:"
-	echo "cinemontage -k video.mp4           creates a montage with 60 images per"
+	echo "cinemontage video.mp4              creates a montage with 60 images per"
 	echo "                                   row, each 160x90 px in size and keeps"
 	echo "                                   them after finishing."
 	echo ""
-	echo "cinemontage -m -c 25 -t video.mp4  creates a montage with 25 images per"
+	echo "cinemontage -c 25 -t -r video.mp4  creates a montage with 25 images per"
 	echo "                                   row, each 16x9 px in size and deletes" 
 	echo "                                   the thumbnail folder after finishing."
-	echo "                                   only works if the thumbnail folder exists,"
-	echo "                                   i.e. if you have used the »keep« option"
-	echo "                                   previously."
 	echo ""
 }
 
 # set initial values
 COLUMNS=60
-KEEP_FLAG=0
-MONTAGE_ONLY_FLAG=0
+REMOVE_FLAG=0
 TINY_FLAG=0
 
 if [[ $@ == "" ]]; then
@@ -44,7 +39,7 @@ if [[ $@ == "" ]]; then
 fi
 
 # read the options
-ARGS=`getopt -o c:hkms:t --long columns:,help,keep,montage-only,space:,tiny -n 'cinemontage.sh' -- "$@"`
+ARGS=`getopt -o c:hrs:t --long columns:,help,remove,space:,tiny -n 'cinemontage.sh' -- "$@"`
 eval set -- "$ARGS"
 
 
@@ -57,8 +52,7 @@ while true ; do
                 *) COLUMNS=$2 ; shift 2 ;;
             esac ;;
         -h|--help) usage && exit 1 ; shift ;;
-        -k|--keep) KEEP_FLAG=1 ; shift ;;
-        -m|--montage-only) MONTAGE_ONLY_FLAG=1 ; shift ;;
+        -r|--remove) REMOVE_FLAG=1 ; shift ;;
 		-s|--space)
             case "$2" in
                 "") shift 2 ;;
@@ -74,11 +68,6 @@ done
 printf "~~~~~~~~~~~~~~~~\n  cinemontage   \n~~~~~~~~~~~~~~~~\n"
 INPUTFILE=$1
 BASENAME=${INPUTFILE%.*}
-
-TMPDIR=./thumbnails
-if [ ! -d $TMPDIR ]; then
-mkdir $TMPDIR
-fi
 
 if [[ $TINY_FLAG == 1 ]]; then
 	H_SIZE=16
@@ -102,15 +91,18 @@ else
 	FILENAME=$BASENAME.jpg
 fi
 
-# only take images from video, if MONTAGE_ONLY_FLAG is not set
-if [[ $MONTAGE_ONLY_FLAG == 0 ]]; then
+TMPDIR=./"$BASENAME"_thumbnails
+if [ ! -d $TMPDIR ]; then
+	# thumbnail are not available
+	mkdir $TMPDIR
+
 	printf "Creating thumbnails...\n"
 	# take one image every second and resize to 160x90 px
 	avconv -v quiet -i $INPUTFILE -s 160x90 -vsync 1 -r 1 -an -y $TMPDIR/'%04d.jpg'
 else
-	printf "Using previously created thumbnails.\n"
+	#thumbnails are available, i.e. NO avconv
+	printf "Found previously created thumbnails :)\n"
 fi
-
 
 if [[ $SPACE ]]; then
 	printf "Stitching montage, %s images/row, %s px space between rows...\n" $COLUMNS $SPACE
@@ -118,17 +110,15 @@ else
 	printf "Stitching montage, %s images/row...\n" $COLUMNS
 fi
 
-
 # create the montage
 montage -background black "$TMPDIR"/*.jpg -tile "$COLUMNS"x -geometry "$H_SIZE"x"$V_SIZE"\>+"$H_SPACE"+"$V_SPACE" "$FILENAME"
 
-
 # clean up
-if [[ $KEEP_FLAG == 0 ]]; then
+if [[ $REMOVE_FLAG == 1 ]]; then
 	printf "Cleaning up...\n"
 	rm -r $TMPDIR
 else
-	printf "Keeping thumbnails.\n"
+	printf "Keeping thumbnails for further use.\n"
 fi
 
-printf "Done.\n"
+printf "\nDone.\n"
