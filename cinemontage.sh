@@ -20,11 +20,11 @@ usage () {
 	echo "EXAMPLES:"
 	echo "cinemontage video.mp4              creates a montage with 60 images per"
 	echo "                                   row, each 160x90 px in size and keeps"
-	echo "                                   them after finishing."
+	echo "                                   thumbnails after finishing."
 	echo ""
 	echo "cinemontage -c 25 -t -r video.mp4  creates a montage with 25 images per"
 	echo "                                   row, each 16x9 px in size and deletes" 
-	echo "                                   the thumbnail folder after finishing."
+	echo "                                   thumbnails after finishing."
 	echo ""
 }
 
