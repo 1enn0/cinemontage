@@ -5,6 +5,9 @@
 #! /bin/bash -
 
 usage () {
+	echo ""
+	echo "cinemontage - look at an entire movie in a single image"
+	echo ""
 	echo "Usage: CINEMONTAGE [options] infile"
 	echo ""
 	echo "OPTIONS:"
@@ -12,7 +15,7 @@ usage () {
 	echo "  -h help          display this help"
 	echo "  -k keep          keep thumbnails"
 	echo "  -m montage-only  use existing thumbnails"
-	echo "  -s space         set space between rows (default: 44 px, 4 px in tiny mode)"
+	echo "  -s space         set space between rows (default: 44 px; 4 px in tiny mode)"
 	echo "  -t tiny          create tiny 16x9 px thumbnails (default: 160x90 px)"
 	echo ""
 	echo "EXAMPLES:"
