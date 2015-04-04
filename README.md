@@ -4,7 +4,7 @@
 a simple bash script for creating a visual fingerprint of an entire movie, similar to "cinema redux".
 it is not very polished yet, so handle with care ;) 
 
-**so far, only 16:9 video material is supported.**
+as of now, only 16:9 video material is supported :weary: :unamused:
 
 
 ###dependencies
